@@ -26,383 +26,627 @@
 //		public int depth;
 //		public boolean isMe;
 //
-//		public int CalculatePoint(int i, int j){
-//			int utility1=0;
-//			int utility2=0;
-//			if(pieces[i][j].value==1){
-//				if(pieces[i][j].directions[VERTICAL]==false){
-//					int count=1;
-//
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i+k, j).value==1){ //next is ours
+//		public int CalculatePoint(int i, int j) {
+//			int utility1 = 0;
+//			int utility2 = 0;
+//			if (pieces[i][j].value == 1) {
+//				if (pieces[i][j].directions[VERTICAL] == false) {
+//					int count = 1;
+//					int step = 1;
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i + k, j).value == 1) { // next is ours
 //							count++;
-//							getPoint(i+k, j).directions[VERTICAL]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
+//							step++;
+//							count*=count;
+//							getPoint(i + k, j).directions[VERTICAL] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i + k, j).value == 2
+//								|| getPoint(i + k, j).value == -1) {
+//							count /= 2;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i - k2, j).value == 2
+//										|| getPoint(i - k2, j).value == -1) {// meet
+//									// enemy,
+//									// check
+//									// last
+//									// space
+//									count = 0;
+//									break;
+//								}
+//							}
+//							break;
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i + k + k2, j).value == 2
+//										|| getPoint(i + k + k2, j).value == -1) { // meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
+//									break;
+//								}
+//							}
+//							if (k2 == kLength - k) {
+//								if (getPoint(i - 1, j).value == 2
+//										|| getPoint(i - 1, j).value == -1) { // check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
+//									break;
+//								}
+//							}
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i - k3, j).value == 2
+//										|| getPoint(i - k3, j).value == -1) { // check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
+//									break;
+//								}
+//							}
 //						}
-//						else if(getPoint(i+k, j).value==2 || getPoint(i+k, j).value==-1){
+//					}
+//					utility1 += count;
+//										System.out.println(String.format("%d,%d V(1): %d", i, j,
+//												count));
+//				}
+//				if (pieces[i][j].directions[HORIZONTAL] == false) {
+//					int count = 1;
+//					int step = 1;
+//
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i, j + k).value == 1) {// next is ours
+//							count++;
+//							step++;
+//							count*=count;
+//							getPoint(i, j + k).directions[HORIZONTAL] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i, j + k).value == 2
+//								|| getPoint(i, j + k).value == -1) {// meet
+//							// enemy,
+//							// check
+//							// last
+//							// space changed
+//							count /= 2;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i, j - k2).value == 2
+//										|| getPoint(i, j - k2).value == -1) {
+//									count = 0;
+//									break;
+//								}
+//							}
+//							break;
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i, j + k + k2).value == 2
+//										|| getPoint(i, j + k + k2).value == -1) {// meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
+//									break;
+//								}
+//							}
+//							if (k2 == kLength - k) {
+//								if (getPoint(i, j - 1).value == 2
+//										|| getPoint(i, j - 1).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
+//									break;
+//								}
+//							}
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i, j - k3).value == 2
+//										|| getPoint(i, j - k3).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
+//									break;
+//								}
+//							}
+//						}
+//					}
+//					utility1 += count;
+//										System.out.println(String.format("%d,%d H(1): %d", i, j,
+//												count));
+//				}
+//				if (pieces[i][j].directions[LEFTDOWN] == false) {
+//					int count = 1;
+//					int step=1;
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i + k, j + k).value == 1) {// next is ours
+//							count++;
+//							step++;
+//							count*=count;
+//							getPoint(i + k, j + k).directions[LEFTDOWN] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i + k, j + k).value == 2
+//								|| getPoint(i + k, j + k).value == -1) {// meet
+//							// enemy,
+//							// check
+//							// last
+//							// space
 //							count/=2;
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i-k2, j).value==2 || getPoint(i-k2, j).value==-1){//meet enemy, check last space
-//									count=0;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i - k2, j - k2).value == 2
+//										|| getPoint(i - k2, j - k2).value == -1) {
+//									count = 0;
 //									break;
 //								}
 //							}
 //							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i+k+k2, j).value==2 || getPoint(i+k+k2, j).value==-1){ //meet enemy, k2 is the position of enemy
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i + k + k2, j + k + k2).value == 2
+//										|| getPoint(i + k + k2, j + k + k2).value == -1) {// meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
 //									break;
 //								}
 //							}
-//							if(k2== kLength-k){
-//								if(getPoint(i-1, j).value==2 || getPoint(i-1, j).value==-1){ //check if there is enough space
-//									count/=2;
+//							if (k2 == kLength - k) {
+//								if (getPoint(i - 1, j - 1).value == 2
+//										|| getPoint(i - 1, j - 1).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
 //									break;
 //								}
 //							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {
-//								if(getPoint(i-k3, j).value==2 || getPoint(i-k3, j).value==-1){ //check if there is enough space
-//									count=0;
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i - k3, j - k3).value == 2
+//										|| getPoint(i - k3, j - k3).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
 //									break;
 //								}
 //							}
 //						}
 //					}
-//					utility1+=count;
-//					System.out.println(String.format("%d,%d V(1): %d", i,j,count));
+//					utility1 += count;
+//										System.out.println(String.format("%d,%d L(1): %d", i, j,
+//												count));
 //				}
-//				if(pieces[i][j].directions[HORIZONTAL]==false){
-//					int count=1;
-//
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i, j+k).value==1){//next is ours
+//				if (pieces[i][j].directions[RIGHTDOWN] == false) {
+//					int count = 1;
+//					int step=1;
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i + k, j - k).value == 1) {// next is ours
 //							count++;
-//							getPoint(i, j+k).directions[HORIZONTAL]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
-//						}
-//						else if(getPoint(i, j+k).value==2 || getPoint(i, j+k).value==-1){//meet enemy, check last space
+//							step++;
+//							count*=count;
+//							getPoint(i + k, j - k).directions[RIGHTDOWN] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i + k, j - k).value == 2
+//								|| getPoint(i + k, j - k).value == -1) {// meet
+//							// enemy,
+//							// check
+//							// last
+//							// space
 //							count/=2;
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i, j-k2).value==2 || getPoint(i, j-k2).value==-1){
-//									count=0;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i - k2, j + k2).value == 2
+//										|| getPoint(i - k2, j + k2).value == -1) {
+//									count = 0;
 //									break;
 //								}
 //							}
 //							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i, j+k+k2).value==2 || getPoint(i, j+k+k2).value==-1){//meet enemy, k2 is the position of enemy
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i + k + k2, j - k - k2).value == 2
+//										|| getPoint(i + k + k2, j - k - k2).value == -1) {// meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
 //									break;
 //								}
 //							}
-//							if(k2== kLength-k){
-//								if(getPoint(i, j-1).value==2 || getPoint(i, j-1).value==-1){//check if there is enough space
-//									count/=2;
+//							if (k2 == kLength - k) {
+//								if (getPoint(i - 1, j + 1).value == 2
+//										|| getPoint(i - 1, j + 1).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
 //									break;
 //								}
 //							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {
-//								if(getPoint(i, j-k3).value==2 || getPoint(i, j-k3).value==-1){//check if there is enough space
-//									count=0;
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i - k3, j + k3).value == 2
+//										|| getPoint(i - k3, j + k3).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
 //									break;
 //								}
 //							}
 //						}
 //					}
-//					utility1+=count;
-//					System.out.println(String.format("%d,%d H(1): %d", i,j,count));
+//					utility1 += count;
+//										System.out.println(String.format("%d,%d R(1): %d", i, j,
+//												count));
 //				}
-//				if(pieces[i][j].directions[LEFTDOWN]==false){
-//					int count=1;
 //
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i+k, j+k).value==1){//next is ours
+//			} else if (pieces[i][j].value == 2) {
+//				if (pieces[i][j].directions[VERTICAL] == false) {
+//					int count = 1;
+//					int step=1;
+//
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i + k, j).value == 2) { // next is ours
 //							count++;
-//							getPoint(i+k, j+k).directions[LEFTDOWN]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
-//						}
-//						else if(getPoint(i+k, j+k).value==2 || getPoint(i+k, j+k).value==-1){//meet enemy, check last space
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i-k2, j-k2).value==2 || getPoint(i-k2, j-k2).value==-1){
-//									count=0;
+//							step++;
+//							count*=count;
+//							getPoint(i + k, j).directions[VERTICAL] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i + k, j).value == 1
+//								|| getPoint(i + k, j).value == -1) {
+//							count /= 2;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i - k2, j).value == 1
+//										|| getPoint(i + k, j).value == -1) {// meet
+//									// enemy,
+//									// check
+//									// last
+//									// space
+//									count = 0;
 //									break;
 //								}
 //							}
 //							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i+k+k2, j+k+k2).value==2 || getPoint(i+k+k2, j+k+k2).value==-1){//meet enemy, k2 is the position of enemy
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i + k + k2, j).value == 1
+//										|| getPoint(i + k + k2, j).value == -1) { // meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
 //									break;
 //								}
 //							}
-//							if(k2== kLength-k){
-//								if(getPoint(i-1, j-1).value==2 || getPoint(i-1, j-1).value==-1){//check if there is enough space
-//									count/=2;
+//							if (k2 == kLength - k) {
+//								if (getPoint(i - 1, j).value == 1
+//										|| getPoint(i - 1, j).value == -1) { // check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
 //									break;
 //								}
 //							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {
-//								if(getPoint(i-k3, j-k3).value==2 || getPoint(i-k3, j-k3).value==-1){//check if there is enough space
-//									count=0;
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i - k3, j).value == 1
+//										|| getPoint(i - k3, j).value == -1) { // check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
 //									break;
 //								}
 //							}
 //						}
 //					}
-//					utility1+=count;
-//					System.out.println(String.format("%d,%d L(1): %d", i,j,count));
+//					utility2 += count;
+//										System.out.println(String.format("%d,%d V(2): %d", i, j,
+//												count));
 //				}
-//				if(pieces[i][j].directions[RIGHTDOWN]==false){
-//					int count=1;
+//				if (pieces[i][j].directions[HORIZONTAL] == false) {
+//					int count = 1;
+//					int step=1;
 //
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i+k, j-k).value==1){//next is ours
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i, j + k).value == 2) {// next is ours
 //							count++;
-//							getPoint(i+k, j-k).directions[RIGHTDOWN]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
-//						}
-//						else if(getPoint(i+k, j-k).value==2 || getPoint(i+k, j-k).value==-1){//meet enemy, check last space
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i-k2, j+k2).value==2 || getPoint(i-k2, j+k2).value==-1){
-//									count=0;
+//							step++;
+//							count*=count;
+//							getPoint(i, j + k).directions[HORIZONTAL] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i, j + k).value == 1
+//								|| getPoint(i, j + k).value == -1) {// meet
+//							// enemy,
+//							// check
+//							// last
+//							// space
+//							count /= 2;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i, j - k2).value == 1
+//										|| getPoint(i, j - k2).value == -1) {
+//									count = 0;
 //									break;
 //								}
 //							}
 //							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i+k+k2, j-k-k2).value==2 || getPoint(i+k+k2, j-k-k2).value==-1){//meet enemy, k2 is the position of enemy
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i, j + k + k2).value == 1
+//										|| getPoint(i, j + k + k2).value == -1) {// meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
 //									break;
 //								}
 //							}
-//							if(k2== kLength-k){
-//								if(getPoint(i-1, j+1).value==2 || getPoint(i-1, j+1).value==-1){//check if there is enough space
-//									count/=2;
+//							if (k2 == kLength - k) {
+//								if (getPoint(i, j - 1).value == 1
+//										|| getPoint(i, j - 1).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
 //									break;
 //								}
 //							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {
-//								if(getPoint(i-k3, j+k3).value==2 || getPoint(i-k3, j+k3).value==-1){//check if there is enough space
-//									count=0;
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i, j - k3).value == 1
+//										|| getPoint(i, j - k3).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
 //									break;
 //								}
 //							}
 //						}
 //					}
-//					utility1+=count;
-//					System.out.println(String.format("%d,%d R(1): %d", i,j,count));
+//					utility2 += count;
+//										System.out.println(String.format("%d,%d H(2): %d", i, j,
+//												count));
 //				}
+//				if (pieces[i][j].directions[LEFTDOWN] == false) {
+//					int count = 1;
+//					int step=1;
 //
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i + k, j + k).value == 2) {// next is ours
+//							count++;
+//							step++;
+//							count*=count;
+//							getPoint(i + k, j + k).directions[LEFTDOWN] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i + k, j + k).value == 1
+//								|| getPoint(i + k, j + k).value == -1) {// meet
+//							// enemy,
+//							// check
+//							// last
+//							// space
+//							count/=2;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i - k2, j - k2).value == 1
+//										|| getPoint(i - k2, j - k2).value == -1) {
+//									count = 0;
+//									break;
+//								}
+//							}
+//							break;
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i + k + k2, j + k + k2).value == 1
+//										|| getPoint(i + k + k2, j + k + k2).value == -1) {// meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
+//									break;
+//								}
+//							}
+//							if (k2 == kLength - k) {
+//								if (getPoint(i - 1, j - 1).value == 1
+//										|| getPoint(i - 1, j - 1).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
+//									break;
+//								}
+//							}
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i - k3, j - k3).value == 1
+//										|| getPoint(i - k3, j - k3).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
+//									break;
+//								}
+//							}
+//						}
+//					}
+//					utility2 += count;
+//										System.out.println(String.format("%d,%d L(2): %d", i, j,
+//												count));
+//				}
+//				if (pieces[i][j].directions[RIGHTDOWN] == false) {
+//					int count = 1;
+//					int step=1;
+//
+//					for (int k = 1; k <= kLength - 1; k++) {
+//						if (getPoint(i + k, j - k).value == 2) {// next is ours
+//							count++;
+//							step++;
+//							count*=count;
+//							getPoint(i + k, j - k).directions[RIGHTDOWN] = true;
+//							if (step == kLength)
+//								return Integer.MAX_VALUE - 1;
+//						} else if (getPoint(i + k, j - k).value == 1
+//								|| getPoint(i + k, j - k).value == -1) {// meet
+//							// enemy,
+//							// check
+//							// last
+//							// space
+//							count/=2;
+//							for (int k2 = 1; k2 <= kLength - k; k2++) {
+//								if (getPoint(i - k2, j + k2).value == 1
+//										|| getPoint(i - k2, j + k2).value == -1) {
+//									count = 0;
+//									break;
+//								}
+//							}
+//							break;
+//						} else {
+//							int k2 = 1;
+//							for (; k2 <= kLength - k - 1; k2++) {
+//								if (getPoint(i + k + k2, j - k - k2).value == 1
+//										|| getPoint(i + k + k2, j - k - k2).value == -1) {// meet
+//									// enemy,
+//									// k2
+//									// is
+//									// the
+//									// position
+//									// of
+//									// enemy
+//									break;
+//								}
+//							}
+//							if (k2 == kLength - k) {
+//								if (getPoint(i - 1, j + 1).value == 1
+//										|| getPoint(i - 1, j + 1).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count /= 2;
+//									break;
+//								}
+//							}
+//							for (int k3 = 1; k3 <= kLength - k - k2; k3++) {
+//								if (getPoint(i - k3, j + k3).value == 1
+//										|| getPoint(i - k3, j + k3).value == -1) {// check
+//									// if
+//									// there
+//									// is
+//									// enough
+//									// space
+//									count = 0;
+//									break;
+//								}
+//							}
+//						}
+//					}
+//					utility2 += count;
+//					//					System.out.println(String.format("%d,%d R(2): %d", i, j,
+//					//							count));
+//				}
 //			}
-//			else if(pieces[i][j].value==2){
-//				if(pieces[i][j].directions[VERTICAL]==false){
-//					int count=1;
 //
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i+k, j).value==2){ //next is ours
-//							count++;
-//							getPoint(i+k, j).directions[VERTICAL]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
-//						}
-//						else if(getPoint(i+k, j).value==1 || getPoint(i+k, j).value==-1){
-//							count/=2;
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i-k2, j).value==1 || getPoint(i+k, j).value==-1){//meet enemy, check last space
-//									count=0;
-//									break;
-//								}
-//							}
-//							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i+k+k2, j).value==1 || getPoint(i+k+k2, j).value==-1){ //meet enemy, k2 is the position of enemy
-//									break;
-//								}
-//							}
-//							if(k2== kLength-k){		
-//								if(getPoint(i-1, j).value==1 || getPoint(i-1, j).value==-1){ //check if there is enough space
-//									count/=2;
-//									break;
-//								}
-//							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {	
-//								if(getPoint(i-k3, j).value==1 || getPoint(i-k3, j).value==-1){ //check if there is enough space
-//									count=0;
-//									break;
-//								}
-//							}
-//						}
-//					}
-//					utility2+=count;
-//					System.out.println(String.format("%d,%d V(2): %d", i,j,count));
-//				}
-//				if(pieces[i][j].directions[HORIZONTAL]==false){
-//					int count=1;
-//
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i, j+k).value==2){//next is ours
-//							count++;
-//							getPoint(i, j+k).directions[HORIZONTAL]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
-//						}
-//						else if(getPoint(i, j+k).value==1 || getPoint(i, j+k).value==-1){//meet enemy, check last space
-//							count/=2;
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i, j-k2).value==1 || getPoint(i, j-k2).value==-1){
-//									count=0;
-//									break;
-//								}
-//							}
-//							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i, j+k+k2).value==1 || getPoint(i, j+k+k2).value==-1){//meet enemy, k2 is the position of enemy
-//									break;
-//								}
-//							}
-//							if(k2== kLength-k){		
-//								if(getPoint(i, j-1).value==1 || getPoint(i, j-1).value==-1){//check if there is enough space
-//									count/=2;
-//									break;
-//								}
-//							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {
-//								if(getPoint(i, j-k3).value==1 || getPoint(i, j-k3).value==-1){//check if there is enough space
-//									count=0;
-//									break;
-//								}
-//							}
-//						}
-//					}
-//					utility2+=count;
-//					System.out.println(String.format("%d,%d H(2): %d", i,j,count));
-//				}
-//				if(pieces[i][j].directions[LEFTDOWN]==false){
-//					int count=1;
-//
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i+k, j+k).value==2){//next is ours
-//							count++;
-//							getPoint(i+k, j+k).directions[LEFTDOWN]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
-//						}
-//						else if(getPoint(i+k, j+k).value==1 || getPoint(i+k, j+k).value==-1){//meet enemy, check last space
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i-k2, j-k2).value==1 || getPoint(i-k2, j-k2).value==-1){
-//									count=0;
-//									break;
-//								}
-//							}
-//							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i+k+k2, j+k+k2).value==1 || getPoint(i+k+k2, j+k+k2).value==-1){//meet enemy, k2 is the position of enemy
-//									break;
-//								}
-//							}
-//							if(k2== kLength-k){
-//								if(getPoint(i-1, j-1).value==1 || getPoint(i-1, j-1).value==-1){//check if there is enough space
-//									count/=2;
-//									break;
-//								}
-//							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {					
-//								if(getPoint(i-k3, j-k3).value==1 || getPoint(i-k3, j-k3).value==-1){//check if there is enough space
-//									count=0;
-//									break;
-//								}
-//							}
-//						}
-//					}
-//					utility2+=count;
-//					System.out.println(String.format("%d,%d L(2): %d", i,j,count));
-//				}
-//				if(pieces[i][j].directions[RIGHTDOWN]==false){
-//					int count=1;
-//
-//					for (int k = 1; k <= kLength-1; k++) {
-//						if(getPoint(i+k, j-k).value==2){//next is ours
-//							count++;
-//							getPoint(i+k, j-k).directions[RIGHTDOWN]=true;
-//							if(count==kLength)
-//								return Integer.MAX_VALUE-1;
-//						}
-//						else if(getPoint(i+k, j-k).value==1 || getPoint(i+k, j-k).value==-1){//meet enemy, check last space
-//							for (int k2 = 1; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i-k2, j+k2).value==1 || getPoint(i-k2, j+k2).value==-1){
-//									count=0;
-//									break;
-//								}
-//							}
-//							break;
-//						}
-//						else {
-//							int k2=1;
-//							for (; k2 <= kLength-k-1; k2++) {
-//								if(getPoint(i+k+k2, j-k-k2).value==1 || getPoint(i+k+k2, j-k-k2).value==-1){//meet enemy, k2 is the position of enemy
-//									break;
-//								}
-//							}
-//							if(k2== kLength-k){
-//								if(getPoint(i-1, j+1).value==1 || getPoint(i-1, j+1).value==-1){//check if there is enough space
-//									count/=2;
-//									break;
-//								}
-//							}
-//							for (int k3 = 1; k3 <= kLength-k-k2; k3++) {
-//								if(getPoint(i-k3, j+k3).value==1 || getPoint(i-k3, j+k3).value==-1){//check if there is enough space
-//									count=0;
-//									break;
-//								}
-//							}
-//						}
-//					}
-//					utility2+=count;
-//					System.out.println(String.format("%d,%d R(2): %d", i,j,count));
-//				}
-//			}
-//			
-//			if(pieces[i][j].value==1)
+//			if (pieces[i][j].value == 1)
 //				return utility1;
-//			else if(pieces[i][j].value==2)
+//			else if (pieces[i][j].value == 2)
 //				return utility2;
 //			return 0;
 //		}
 //		
-//		public int CalculateUtility(){
-//			int utility1=0;
-//			int utility2=0;
-//			for(int i=0;i<pieces.length;i++){
-//				for(int j=0;j<pieces[0].length;j++){
-//					int utility=CalculatePoint(i, j);
-//					if(pieces[i][j].value==1)
-//						utility1+=utility;
-//					else if(pieces[i][j].value==2)
-//						utility2+=utility;
+//		public int CalculateUtility() {
+//			int utility1 = 0;
+//			int utility2 = 0;
+//			boolean over=false;
+//			for (int i = 0; i < pieces.length; i++) {
+//				if(over)
+//					break;
+//				for (int j = 0; j < pieces[0].length; j++) {
+//					int utility = CalculatePoint(i, j);
+//					if(utility==Integer.MAX_VALUE-1){
+//						over=true;
+//						if (pieces[i][j].value == 1) {
+//							utility1 = utility;
+//							utility2 = 0;
+//							break;
+//						}
+//						else if (pieces[i][j].value == 2) {
+//							utility2 = utility;
+//							utility1 = 0;
+//							break;
+//						}
+//					}
+//					else{
+//						if (pieces[i][j].value == 1)
+//							utility1 += utility;
+//						else if (pieces[i][j].value == 2)
+//							utility2 += utility;
+//					}		
 //				}
 //			}
-//			return utility1-utility2;
+//			//System.out.println(new String().format("u1= %d,  u2=%d",utility1,utility2));
+//
+//			return utility1 - utility2;
 //		}
 //
 //		public Point getPoint(int x,int y){
@@ -428,16 +672,20 @@
 //	}
 //
 //
-////	public static void main(String[] args) {
-////		// TODO Auto-generated method stub
-////		kLength=5;
-////		byte[][] b={{1,1,1,1,0},{0,1,0,0,0},{0,0,1,0,0},{0,0,0,0,0},{0,0,0,0,0}};
-////		State state=new State(b, true, null);
-////		//int n=state.CalculatePoint(0, 0);	
-////		int n=state.CalculateUtility();
-////		System.out.println(n);
-////
-////		//state.getPoint(10, 10).value=1;
-////	}
+//	public static void main(String[] args) {
+//		// TODO Auto-generated method stub
+//		kLength = 5;
+//		byte[][] b = new byte[15][15];
+//		b[5][5]=b[6][5]=b[7][5]=b[7][6]=1;
+//		b[6][6]=b[7][7]=b[8][8]=b[9][9]=b[8][6]=2;
+//		b[8][5]=1;
+//		b[10][10]=2;
+//		State state = new State(b, true, null);
+//		// int n=state.CalculatePoint(0, 0);
+//		int n = state.CalculateUtility();
+//		System.out.println(n);
+//
+//		// state.getPoint(10, 10).value=1;
+//	}
 //
 //}
