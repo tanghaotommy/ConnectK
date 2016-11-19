@@ -3,8 +3,8 @@ import connectK.BoardModel;
 
 import java.awt.Point;
 import java.util.ArrayList;
-
-import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SparkAI extends CKPlayer {
 	static int MAXDEPTH = 1;
@@ -44,7 +44,6 @@ public class SparkAI extends CKPlayer {
 		public int alpha = Integer.MIN_VALUE;
 		public int beta = Integer.MAX_VALUE;
 		public int value;
-		public State parent;
 		public int depth;
 		public int player;
 		public Action action;
@@ -72,7 +71,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i + k, j).value == 1) { // next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i + k, j).directions[VERTICAL] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -144,7 +143,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i, j + k).value == 1) {// next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i, j + k).directions[HORIZONTAL] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -215,7 +214,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i + k, j + k).value == 1) {// next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i + k, j + k).directions[LEFTDOWN] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -286,7 +285,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i + k, j - k).value == 1) {// next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i + k, j - k).directions[RIGHTDOWN] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -360,7 +359,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i + k, j).value == 2) { // next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i + k, j).directions[VERTICAL] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -432,7 +431,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i, j + k).value == 2) {// next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i, j + k).directions[HORIZONTAL] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -504,7 +503,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i + k, j + k).value == 2) {// next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i + k, j + k).directions[LEFTDOWN] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -576,7 +575,7 @@ public class SparkAI extends CKPlayer {
 						if (getPoint(i + k, j - k).value == 2) {// next is ours
 							count++;
 							step++;
-							count*=count;
+							count*=10;
 							getPoint(i + k, j - k).directions[RIGHTDOWN] = true;
 							if (step == kLength)
 								return Integer.MAX_VALUE - 1;
@@ -698,7 +697,7 @@ public class SparkAI extends CKPlayer {
 			return pieces[x][y];
 		}
 		
-		public int CalculateNumber (int directions, int player, int i, int j, boolean[][] visited){
+		public int CalculateNumber (int directions, int checkPlayer, int i, int j, boolean[][] visited){
 			int xCo = 0, yCo = 0;
 			switch (directions) {
 			case HORIZONTAL:
@@ -716,50 +715,57 @@ public class SparkAI extends CKPlayer {
 			}
 			int step = 1;
 			for (int k = 1; k <= kLength - 1; k++) {
-				if (getPoint(i + xCo*k, j + yCo*k).value == player) { // next is ours
+				if (getPoint(i + xCo*k, j + yCo*k).value == checkPlayer) { // next is ours
 					step++;
 					getPoint(i + xCo*k, j + yCo*k).directions[directions] = true;
 				} else break;
 			}
 			
-			if (step >= kLength - 2) {
-				if (getPoint(i - xCo, j - yCo).value == 0) {
+			if (step >= 1) {
+				if (getPoint(i - xCo, j - yCo).value == 0 && !visited[i-xCo][j-yCo]) {
 					visited[i-xCo][j-yCo]=true;
 					int nextPlayer = 0;
 					if (player == 1)
 						nextPlayer = 2;
 					else if (player == 2)
 						nextPlayer = 1;
-					State state = new State(pieces, nextPlayer, this);
+					State state = new State(pieces, nextPlayer);
 					state.getPoint(i-xCo, j-yCo).value = (byte) player;
 					state.depth = this.depth + 1;
 					state.alpha = this.alpha;
 					state.beta = this.beta;
 					Action action = new Action(new MyPoint(
-							(byte) nextPlayer));
+							(byte) player));
 					action.point.x = i-xCo;
 					action.point.y = j-yCo;
 					state.action = action;
 					successors.add(state);
+//					if (step >= kLength-2) {
+//					System.out.println("1: x="+(i-xCo)+" y="+(j-yCo)+" i="+(i)+" j="+(j));
+//					}
 				}
-				if (getPoint(i + xCo*step, j + yCo*step).value == 0) {
+				if (getPoint(i + xCo*step, j + yCo*step).value == 0 && !visited[i + xCo*step][j + yCo*step]) {
 					visited[i + xCo*step][j + yCo*step]=true;
 					int nextPlayer = 0;
 					if (player == 1)
 						nextPlayer = 2;
 					else if (player == 2)
 						nextPlayer = 1;
-					State state = new State(pieces, nextPlayer, this);
+					State state = new State(pieces, nextPlayer);
 					state.getPoint(i + xCo*step, j + yCo*step).value = (byte) player;
 					state.depth = this.depth + 1;
 					state.alpha = this.alpha;
 					state.beta = this.beta;
 					Action action = new Action(new MyPoint(
-							(byte) nextPlayer));
+							(byte) player));
 					action.point.x = i + xCo*step;
 					action.point.y = j + yCo*step;
 					state.action = action;
 					successors.add(state);
+//					if (step >= kLength-2) {
+//						System.out.println("2: x="+(i + xCo*step)+" y="+(j + yCo*step)+" i="+(i)+" j="+(j));
+//					}
+					
 				}
 			}
 				
@@ -789,6 +795,7 @@ public class SparkAI extends CKPlayer {
 							if(j<jMin)
 								jMin=j;
 							count++;
+							
 							if (pieces[i][j].directions[VERTICAL] == false ) {
 								pieces[i][j].directions[VERTICAL] = true;
 								CalculateNumber(VERTICAL, getPoint(i, j).value, i, j,visited);
@@ -808,85 +815,102 @@ public class SparkAI extends CKPlayer {
 						}
 					}
 				}
+				
 				if(iMin==pieces.length && iMax==-1 && jMin==pieces[0].length && jMax==-1){
 					iMax=pieces.length/2;
 					iMin=pieces.length/2-1;
 					jMax=pieces[0].length/2;
 					jMin=pieces[0].length/2-1;
+					
+					int nextPlayer = 0;
+					if (player == 1)
+						nextPlayer = 2;
+					else if (player == 2)
+						nextPlayer = 1;
+					State state = new State(pieces, nextPlayer);
+					state.getPoint(iMax, jMax).value = (byte) player;
+					state.depth = this.depth + 1;
+					state.alpha = this.alpha;
+					state.beta = this.beta;
+					Action action = new Action(new MyPoint(
+							(byte) player));
+					action.point.x = iMax;
+					action.point.y = jMin;
+					state.action = action;
+					successors.add(state);
 				}
 
-				for (int i = iMin; i <=iMax; i++) {
-					for (int j = jMin; j <=jMax; j++) {
-						if (getPoint(i, j).value == 0) {
-							visited[i][j]=true;
-							int nextPlayer = 0;
-							if (player == 1)
-								nextPlayer = 2;
-							else if (player == 2)
-								nextPlayer = 1;
-							State state = new State(pieces, nextPlayer, this);
-							state.getPoint(i, j).value = (byte) player;
-							state.depth = this.depth + 1;
-							state.alpha = this.alpha;
-							state.beta = this.beta;
-							Action action = new Action(new MyPoint(
-									(byte) nextPlayer));
-							action.point.x = i;
-							action.point.y = j;
-							state.action = action;
-							successors.add(state);
-							//System.out.println(new String().format("depth:%d, action:(%d, %d)",this.depth, i, j));
-						}
-					}
-				}
+//				for (int i = iMin; i <=iMax; i++) {
+//					for (int j = jMin; j <=jMax; j++) {
+//						if (getPoint(i, j).value == 0 && !visited[i][j]) {
+//							visited[i][j]=true;
+//							int nextPlayer = 0;
+//							if (player == 1)
+//								nextPlayer = 2;
+//							else if (player == 2)
+//								nextPlayer = 1;
+//							State state = new State(pieces, nextPlayer);
+//							state.getPoint(i, j).value = (byte) player;
+//							state.depth = this.depth + 1;
+//							state.alpha = this.alpha;
+//							state.beta = this.beta;
+//							Action action = new Action(new MyPoint(
+//									(byte) player));
+//							action.point.x = i;
+//							action.point.y = j;
+//							state.action = action;
+//							successors.add(state);
+//							//System.out.println(new String().format("depth:%d, action:(%d, %d)",this.depth, i, j));
+//						}
+//					}
+//				}
 
-				int addition=0;
-				if(depth<=3)
-					addition=1;
-				else 
-					addition=1;
-				if((double)count/(iMax-iMin)/(jMax-jMin)<0.5)
-					addition=1;
-				iMax = iMax + addition;
-				iMax = (iMax > pieces.length-1)?pieces.length-1:iMax;
-				iMin = iMin - addition;
-				iMin = (iMin < 0)?0:iMin;
-				jMax = jMax + addition;
-				jMax = (jMax > pieces[0].length-1)?pieces[0].length-1:jMax;
-				jMin = jMin - addition;
-				jMin = (jMin < 0)?0:jMin;
-
-				for (int i = iMin; i <=iMax; i++) {
-					for (int j = jMin; j <=jMax; j++) {
-						if (visited[i][j]==false && getPoint(i, j).value == 0) {
-							visited[i][j]=true;
-							int nextPlayer = 0;
-							if (player == 1)
-								nextPlayer = 2;
-							else if (player == 2)
-								nextPlayer = 1;
-							State state = new State(pieces, nextPlayer, this);
-							state.getPoint(i, j).value = (byte) player;
-							state.depth = this.depth + 1;
-							state.alpha = this.alpha;
-							state.beta = this.beta;
-							Action action = new Action(new MyPoint(
-									(byte) nextPlayer));
-							action.point.x = i;
-							action.point.y = j;
-							state.action = action;
-							successors.add(state);
-							//System.out.println(new String().format("depth:%d, action:(%d, %d)",this.depth, i, j));
-						}
-					}
-				}
+//				int addition=0;
+//				if(depth<=3)
+//					addition=1;
+//				else 
+//					addition=1;
+//				if((double)count/(iMax-iMin)/(jMax-jMin)<0.5)
+//					addition=1;
+//				iMax = iMax + addition;
+//				iMax = (iMax > pieces.length-1)?pieces.length-1:iMax;
+//				iMin = iMin - addition;
+//				iMin = (iMin < 0)?0:iMin;
+//				jMax = jMax + addition;
+//				jMax = (jMax > pieces[0].length-1)?pieces[0].length-1:jMax;
+//				jMin = jMin - addition;
+//				jMin = (jMin < 0)?0:jMin;
+//
+//				for (int i = iMin; i <=iMax; i++) {
+//					for (int j = jMin; j <=jMax; j++) {
+//						if (visited[i][j]==false && getPoint(i, j).value == 0) {
+//							visited[i][j]=true;
+//							int nextPlayer = 0;
+//							if (player == 1)
+//								nextPlayer = 2;
+//							else if (player == 2)
+//								nextPlayer = 1;
+//							State state = new State(pieces, nextPlayer);
+//							state.getPoint(i, j).value = (byte) player;
+//							state.depth = this.depth + 1;
+//							state.alpha = this.alpha;
+//							state.beta = this.beta;
+//							Action action = new Action(new MyPoint(
+//									(byte) player));
+//							action.point.x = i;
+//							action.point.y = j;
+//							state.action = action;
+//							successors.add(state);
+//							//System.out.println(new String().format("depth:%d, action:(%d, %d)",this.depth, i, j));
+//						}
+//					}
+//				}
 
 			}
 		}
 
-		public State(MyPoint[][] pieces, int player, State parent) {
+		public State(MyPoint[][] pieces, int player) {
 			this.player = player;
-			this.parent = parent;
 			this.pieces = new MyPoint[pieces.length][pieces[0].length];
 			for (int i = 0; i < pieces.length; i++) {
 				for (int j = 0; j < pieces[0].length; j++) {
@@ -897,7 +921,7 @@ public class SparkAI extends CKPlayer {
 			}
 		}
 
-		public State(byte[][] pieces, int player, State parent) {
+		public State(byte[][] pieces, int player) {
 			this.pieces = new MyPoint[pieces.length][pieces[0].length];
 			for (int i = 0; i < pieces.length; i++) {
 				for (int j = 0; j < pieces[0].length; j++) {
@@ -907,21 +931,33 @@ public class SparkAI extends CKPlayer {
 				}
 			}
 			this.player = player;
-			this.parent = parent;
 			this.depth=0;
-			GenerateSuccessor();
+			//GenerateSuccessor();
 		}
 	}
 
 	public Action Alpha_Beta_Search(State state) {
 		int v = Max_Value(state, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		//System.out.println("Max_Value " + v);
+//		System.out.println("Depth="+MAXDEPTH);
+//		for(State successor : state.successors) {
+//			System.out.println("action x="+successor.action.point.x+" y="+successor.action.point.y+" value="+successor.value);
+//			for (int i = 0; i < successor.pieces.length; i++) {
+//				for (int j = 0; j < successor.pieces[0].length; j++) {
+//					System.out.print(successor.pieces[i][j].value);
+//				}
+//				System.out.println();
+//			}
+//		}
 		for (State successor : state.successors) {
 			if (successor.value == v) {
 				state2.value = v;
 				state2.currentBestAction = successor.action;
+				System.out.println("Expected values at depth: " + MAXDEPTH + " is " + state2.value + " ("+state2.currentBestAction.point.x+", "+state2.currentBestAction.point.y+")");
+				
 				return successor.action;
 			}
+			
 		}
 		return null;
 	}
@@ -930,38 +966,34 @@ public class SparkAI extends CKPlayer {
 		if (state.depth == MAXDEPTH)
 			return true;
 		else
-			return false;
+			return false;	
 	}
 
 	public int Max_Value(State state, int alpha, int beta) {
 		if (TerminalTest(state))
 			return state.CalculateUtility();
+		else{
+			int utility=state.CalculateUtility();
+			if(utility==Integer.MAX_VALUE-1 || utility==1-Integer.MAX_VALUE)
+				return utility;
+		}
 		state.value = Integer.MIN_VALUE;
 		//System.out.println(new String().format("GenerateSuccessor in Max_Value Depth:%d", state.depth));
 		state.GenerateSuccessor();
 		for (State s : state.successors) {
-			if(System.currentTimeMillis()-startTime>=deadline-300){
-				Action action = null;
-				if (state3.alpha!=Integer.MIN_VALUE) {
-					for (State successor : state3.successors) {
-						if (successor.value == state3.value) {
-							action = successor.action;
-							break;
-						}
-					}
-				} else {
-					action = state2.currentBestAction;
-				}
-
-				throw new JumpOutMsg(action);
-			}
-			int m = Min_Value(s, alpha, beta);
+			int m = Min_Value(s, state.alpha, state.beta);
 			state.value = m > state.value ? m : state.value;
 			if (state.value >= beta) {
 				//System.out.println("Pruned!");
 				return state.value;
 			}
-			alpha = alpha > state.value ? alpha : state.value;
+			state.alpha = alpha > state.value ? alpha : state.value;
+		}
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return state.value;
 	}
@@ -969,31 +1001,22 @@ public class SparkAI extends CKPlayer {
 	public int Min_Value(State state, int alpha, int beta) {
 		if (TerminalTest(state))
 			return state.CalculateUtility();
+		else{
+			int utility=state.CalculateUtility();
+			if(utility==Integer.MAX_VALUE-1 || utility==1-Integer.MAX_VALUE)
+				return utility;
+		}
 		state.value = Integer.MAX_VALUE;
 		//System.out.println(new String().format("GenerateSuccessor in Min_Value Depth:%d", state.depth));
 		state.GenerateSuccessor();
 		for (State s : state.successors) {
-			if(System.currentTimeMillis()-startTime>=deadline-300){
-				Action action = null;
-				if (state3.alpha!=Integer.MIN_VALUE) {
-					for (State successor : state3.successors) {
-						if (successor.value == state3.value) {
-							action = successor.action;
-							break;
-						}
-					}
-				} else {
-					action = state2.currentBestAction;
-				}
-				throw new JumpOutMsg(action);
-			}
-			int m = Max_Value(s, alpha, beta);
+			int m = Max_Value(s, state.alpha, state.beta);
 			state.value = m < state.value ? m : state.value;
 			if (state.value <= alpha) {
 				//System.out.println("Pruned!");
 				return state.value;
 			}
-			beta = beta < state.value ? beta : state.value;
+			state.beta = beta < state.value ? beta : state.value;
 		}
 		return state.value;
 	}
@@ -1013,37 +1036,78 @@ public class SparkAI extends CKPlayer {
 	}
 
 	long startTime=0;
-	State state2;
-	State state3;
+	static State state2;
+	static State state3;
 	long deadline=5000;
 	@Override
 	public Point getMove(BoardModel state) {
-		// for (int i = 0; i < state.getWidth(); ++i)
-		// for (int j = 0; j < state.getHeight(); ++j)
-		// if (state.getSpace(i, j) == 0)
-		// return new Point(i, j);
-		// return null;
-		MAXDEPTH = 1;
-		startTime=System.currentTimeMillis();
-		state2 = new State(state.pieces, currentAIPlayer, null);
-		MyPoint myPoint=null;
-		try {
-			for(int i=1;i<10;i++){
-				MAXDEPTH=i;
-				System.out.println("Current depth:" + MAXDEPTH);
-				state3 = new State(state.pieces, currentAIPlayer, null);
-				myPoint = Alpha_Beta_Search(state3).point;
-			}
-		} catch (JumpOutMsg e) {
-			myPoint = e.action.point;
+		Thread t=new MyThread(state);
+        t.start();
+        try {
+			Thread.sleep(deadline-200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		//System.out.println("x = "+myPoint.x+" y = "+myPoint.y);
-		return new Point(myPoint.x, myPoint.y);
+        t.stop();
+        Action action=null;
+//        if (state3.alpha!=Integer.MIN_VALUE) {
+//			for (State successor : state3.successors) {
+//				if (successor.value == state3.value) {
+//					action = successor.action;
+//					System.out.println("Current Depth!");
+//					System.out.println("Expected values" + state3.value);
+//					break;
+//				}
+//			}
+//		} else {
+//			action = state2.currentBestAction;
+//			System.out.println("Last Depth!");
+//		}
+        action = state2.currentBestAction;
+		return new Point(action.point.x, action.point.y);
 	}
 
 	@Override
 	public Point getMove(BoardModel state, int deadline) {
+		this.deadline = deadline;
 		return getMove(state);
 	}
+	
+	MyPoint myPoint=null;
+	
+	class MyThread extends Thread{
+		BoardModel state;
+		
+		public MyThread(BoardModel state) {
+			this.state=state;
+		}
+		
+	    @Override
+	    public void run() {
+	    	// for (int i = 0; i < state.getWidth(); ++i)
+			// for (int j = 0; j < state.getHeight(); ++j)
+			// if (state.getSpace(i, j) == 0)
+			// return new Point(i, j);
+			// return null;
+			MAXDEPTH = 1;
+			//int player = currentAIPlayer==1 ? 2 : 1;
+			startTime=System.currentTimeMillis();
+			state2 = new SparkAI.State(state.pieces, currentAIPlayer);
+			
+			try {
+				for(int i=1;i<10;i++){
+					MAXDEPTH=i;
+					System.out.println("Current depth:" + MAXDEPTH);
+					state3 = new SparkAI.State(state.pieces, currentAIPlayer);
+					myPoint = Alpha_Beta_Search(state3).point;
+				}
+			} catch (JumpOutMsg e) {
+				myPoint = e.action.point;
+			}
+			//System.out.println("x = "+myPoint.x+" y = "+myPoint.y);
+	    }
+	}
+
 
 }
