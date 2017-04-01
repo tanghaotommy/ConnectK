@@ -954,6 +954,13 @@ public class SparkAI extends CKPlayer {
 					}
 				}
 			}
+			
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		}
 
@@ -1002,8 +1009,8 @@ public class SparkAI extends CKPlayer {
 			if (successor.Value.value == v) {
 				state2.value = v;
 				state2.currentBestAction = successor.Value.action;
-				System.out.println("Expected values at depth: " + MAXDEPTH + " is " + state2.value + " ("
-						+ state2.currentBestAction.point.x + ", " + state2.currentBestAction.point.y + ")");
+				//System.out.println("Expected values at depth: " + MAXDEPTH + " is " + state2.value + " ("
+				//		+ state2.currentBestAction.point.x + ", " + //state2.currentBestAction.point.y + ")");
 
 				return successor.Value.action;
 			}
@@ -1043,12 +1050,12 @@ public class SparkAI extends CKPlayer {
 			}
 			state.alpha = alpha > state.value ? alpha : state.value;
 		}
-		try {
-			Thread.sleep(2);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(2);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		return state.value;
 	}
 
@@ -1076,12 +1083,12 @@ public class SparkAI extends CKPlayer {
 			}
 			state.beta = beta < state.value ? beta : state.value;
 		}
-		try {
-			Thread.sleep(2);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(2);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		return state.value;
 	}
 
@@ -1103,27 +1110,30 @@ public class SparkAI extends CKPlayer {
 	long startTime = 0;
 	static State state2;
 	static State state3;
-	long deadline = 5000;
+	long deadline = 0;
 
 	@Override
 	public Point getMove(BoardModel state) {
+		long start=System.currentTimeMillis();
 		Thread t = new MyThread(state);
 		t.start();
 		try {
-			Thread.sleep(deadline - 200);
+			Thread.sleep(deadline - 500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		double stop1=(System.currentTimeMillis()-start)/1000.0;
 		t.stop();
+		double stop2=(System.currentTimeMillis()-start)/1000.0;
 		Action action = null;
 		if (state3.alpha != Integer.MIN_VALUE) {
 			for (Pair successor : state3.successors) {
 				if (successor.Value.value == state3.value) {
 					action = successor.Value.action;
-					System.out.print("Current Depth!");
-					System.out.print(" Expected move: (" + action.point.x + ", " + action.point.y);
-					System.out.println(") Expected values" + state3.value);
+					//System.out.print("Current Depth!");
+					//System.out.print(" Expected move: (" + action.point.x + ", " + action.point.y);
+					//System.out.println(") Expected values" + state3.value);
 					break;
 				}
 			}
@@ -1131,7 +1141,9 @@ public class SparkAI extends CKPlayer {
 			action = state2.currentBestAction;
 			// System.out.println("Last Depth!");
 		}
+		double stop3=(System.currentTimeMillis()-start)/1000.0;
 		// action = state2.currentBestAction;
+		//System.out.println(" stop1="+stop1+" stop2="+stop2+" stop3="+stop3);
 		return new Point(action.point.x, action.point.y);
 	}
 
@@ -1159,13 +1171,12 @@ public class SparkAI extends CKPlayer {
 			// return null;
 			MAXDEPTH = 1;
 			// int player = currentAIPlayer==1 ? 2 : 1;
-			startTime = System.currentTimeMillis();
 			state2 = new SparkAI.State(state.pieces, currentAIPlayer);
 
 			try {
 				for (int i = 1; i < 10; i++) {
 					MAXDEPTH = i;
-					System.out.println("Current depth:" + MAXDEPTH);
+					//System.out.println("Current depth:" + MAXDEPTH);
 					state3 = new SparkAI.State(state.pieces, currentAIPlayer);
 
 					if (i >= 3) {
